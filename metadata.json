@@ -1,0 +1,7 @@
+{
+  "name": "Copy of El Detector de Cuentos",
+  "description": "Tu guardián contra estafas en WhatsApp, Marketplace e Instagram. Sube un pantallazo y deja que la IA detecte mentiras, ediciones y presión psicológica.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
