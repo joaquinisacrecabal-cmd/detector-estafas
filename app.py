@@ -2,90 +2,40 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-# 1. Configuración Visual
-st.set_page_config(page_title="Detector de Estafas Chile", page_icon="🛡️", layout="centered")
+st.set_page_config(page_title="Detector Estafas", page_icon="🛡️")
+st.markdown("<h1 style='text-align: center; color: #b71c1c;'>🛡️ Detector Anti-Estafas Chile</h1>", unsafe_allow_html=True)
 
-# 2. Título Agresivo y Claro
-st.markdown("""
-    <h1 style='text-align: center; color: #b71c1c;'>🛡️ Ciberseguridad & Antifraude</h1>
-    <p style='text-align: center; font-size: 1.1em;'>
-        Inteligencia Artificial para detectar estafas en WhatsApp, Instagram, Marketplace y Bancos.
-    </p>
-""", unsafe_allow_html=True)
+# Sidebar
+api_key = st.sidebar.text_input("Pega tu API Key:", type="password")
 
-# 3. Sidebar
-with st.sidebar:
-    st.header("🔑 Configuración")
-    api_key = st.text_input("Tu API Key:", type="password")
-    st.info("Detecta: Comprobantes falsos, Phishing, Amenazas, Perfiles Fake.")
+uploaded_file = st.file_uploader("Sube la evidencia (Pantallazo/Foto)", type=["jpg", "png", "jpeg"])
 
-# 4. Pestañas para todo tipo de estafa
-tab1, tab2 = st.tabs(["📸 Analizar Pantallazo", "📝 Analizar Texto/Chat"])
-
-# --- PESTAÑA 1: IMÁGENES (Comprobantes, Perfiles, Chats) ---
-with tab1:
-    st.write("Sube pantallazos de: Transferencias, Perfiles de IG/Marketplace, Conversaciones de WhatsApp.")
-    uploaded_file = st.file_uploader("Sube la imagen aquí", type=["jpg", "png", "jpeg"])
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Evidencia", use_container_width=True)
     
-    if uploaded_file:
-        image = Image.open(uploaded_file)
-        # Sin el error amarillo
-        st.image(image, caption="Evidencia a analizar", use_container_width=True)
-        
-        if st.button("🚨 ESCANEAR EVIDENCIA"):
-            if not api_key:
-                st.error("Falta la API Key.")
-            else:
-                with st.spinner('Rastreando patrones de fraude...'):
-                    try:
-                        genai.configure(api_key=api_key)
-                        model = genai.GenerativeModel('gemini-1.5-flash')
-                        
-                        prompt = """
-                        Actúa como el mayor experto en Ciberseguridad de Chile.
-                        Analiza esta imagen buscando SEÑALES DE PELIGRO:
-                        1. Si es comprobante bancario: Busca ediciones, fuentes distintas, horas falsas.
-                        2. Si es chat/perfil: Busca lenguaje de estafador, presión psicológica, amenazas.
-                        3. Si es venta: Precios irreales.
-                        
-                        Dime DIRECTO:
-                        - 🛑 VEREDICTO: (ESTAFA / SOSPECHOSO / REAL)
-                        - 💀 NIVEL DE RIESGO: 0-100%
-                        - 🗣️ EXPLICACIÓN: Por qué me quieren cagar.
-                        """
-                        
-                        response = model.generate_content([prompt, image])
-                        st.success("Análisis Finalizado")
-                        st.markdown(response.text)
-                    except Exception as e:
-                        st.error(f"Error: {e}")
-
-# --- PESTAÑA 2: TEXTO (Correos, Amenazas, Links) ---
-with tab2:
-    st.write("Pega aquí: Correos raros, mensajes con links, amenazas de funa o descripciones.")
-    texto = st.text_area("Pega el texto sospechoso:", height=150)
-    
-    if st.button("🕵️‍♂️ ANALIZAR MENSAJE"):
+    if st.button("🚨 ANALIZAR AHORA"):
         if not api_key:
-            st.error("Falta la API Key.")
+            st.error("Falta la API Key")
         else:
-            with st.spinner('Analizando intenciones...'):
+            with st.spinner('Contactando a la IA...'):
                 try:
                     genai.configure(api_key=api_key)
-                    model = genai.GenerativeModel('gemini-1.5-flash')
                     
-                    prompt = f"""
-                    Analiza este texto con mentalidad de desconfiado chileno:
-                    "{texto}"
-                    
-                    Dime:
-                    1. ¿Qué intentan hacer? (Robar datos, asustar, estafar plata).
-                    2. ¿Es real o mentira?
-                    3. ¿Qué debo responder o hacer?
-                    """
-                    
-                    response = model.generate_content(prompt)
-                    st.info("Informe de Seguridad")
-                    st.write(response.text)
+                    # INTENTO 1: Modelo Flash (El mejor)
+                    try:
+                        model = genai.GenerativeModel('gemini-1.5-flash')
+                        response = model.generate_content(["Analiza si esto es estafa. Sé breve.", image])
+                        st.success("✅ Análisis Flash:")
+                        st.write(response.text)
+                    except:
+                        # INTENTO 2: Modelo Pro (El clásico, si falla el Flash)
+                        st.warning("Usando modelo de respaldo...")
+                        model = genai.GenerativeModel('gemini-pro-vision')
+                        response = model.generate_content(["Analiza si esto es estafa.", image])
+                        st.success("✅ Análisis Respaldo:")
+                        st.write(response.text)
+                        
                 except Exception as e:
-                    st.error(f"Error: {e}")
+                    st.error(f"Error final: {e}")
+                    st.info("Ayuda: Borra la App en Streamlit y créala de nuevo para actualizar las librerías.")
