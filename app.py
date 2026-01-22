@@ -22,7 +22,8 @@ uploaded_file = st.file_uploader("📸 Sube la evidencia aquí (Foto)", type=["j
 if uploaded_file is not None:
     # Mostrar imagen
     image = Image.open(uploaded_file)
-    st.image(image, caption='Evidencia subida', use_column_width=True)
+    # AQUÍ ESTÁ EL ARREGLO: usamos use_container_width=True
+    st.image(image, caption='Evidencia subida', use_container_width=True)
 
     # Botón de acción
     if st.button("🚨 ANALIZAR AHORA"):
@@ -32,16 +33,18 @@ if uploaded_file is not None:
             with st.spinner('🕵️‍♂️ La IA está interrogando a la imagen...'):
                 try:
                     genai.configure(api_key=api_key)
+                    # Versión segura del modelo
                     model = genai.GenerativeModel('gemini-1.5-flash')
                     
                     prompt = """
-                    Analiza esta imagen con mentalidad de chileno desconfiado.
+                    Actúa como experto en ciberseguridad chileno.
+                    Analiza esta imagen con mentalidad de desconfiado.
                     Busca:
-                    1. Ediciones truchas en comprobantes (fuentes distintas).
-                    2. Lenguaje de estafador ("amigo transfiera ya", mala ortografía).
+                    1. Ediciones truchas en comprobantes (fuentes distintas, photoshop).
+                    2. Lenguaje de estafador ("amigo transfiera ya", mala ortografía, presión).
                     3. Precios imposibles en Marketplace.
                     
-                    Responde con:
+                    Responde con este formato:
                     - 🛑 VEREDICTO: (ESTAFA / SOSPECHOSO / REAL)
                     - 💀 NIVEL DE PELIGRO: 0-100%
                     - 🗣️ EL ANÁLISIS: Explica por qué, corto y preciso.
