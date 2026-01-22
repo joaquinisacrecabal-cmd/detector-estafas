@@ -2,81 +2,90 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-# 1. Configuración de la Ventana
-st.set_page_config(page_title="Consultor IA Automotriz", page_icon="💼", layout="centered")
+# 1. Configuración Visual
+st.set_page_config(page_title="Detector de Estafas Chile", page_icon="🛡️", layout="centered")
 
-# 2. Título y Estilo Corporativo
+# 2. Título Agresivo y Claro
 st.markdown("""
-    <h1 style='text-align: center; color: #004aad;'>💼 Consultor de Inversión Automotriz</h1>
+    <h1 style='text-align: center; color: #b71c1c;'>🛡️ Ciberseguridad & Antifraude</h1>
     <p style='text-align: center; font-size: 1.1em;'>
-        Herramienta de Business Intelligence para detectar oportunidades y estafas en la compra de vehículos.
+        Inteligencia Artificial para detectar estafas en WhatsApp, Instagram, Marketplace y Bancos.
     </p>
 """, unsafe_allow_html=True)
 
-# 3. Barra Lateral (API Key)
+# 3. Sidebar
 with st.sidebar:
-    st.header("🔐 Acceso Gerencial")
-    api_key = st.text_input("Ingresa tu API Key:", type="password")
-    st.caption("Sistema potenciado por Google Gemini 1.5 Flash")
+    st.header("🔑 Configuración")
+    api_key = st.text_input("Tu API Key:", type="password")
+    st.info("Detecta: Comprobantes falsos, Phishing, Amenazas, Perfiles Fake.")
 
-# 4. Pestañas para elegir modo
-tab1, tab2 = st.tabs(["📸 Analizar Foto/Pantallazo", "📝 Analizar Texto/Link"])
+# 4. Pestañas para todo tipo de estafa
+tab1, tab2 = st.tabs(["📸 Analizar Pantallazo", "📝 Analizar Texto/Chat"])
 
-# --- MODO FOTO ---
+# --- PESTAÑA 1: IMÁGENES (Comprobantes, Perfiles, Chats) ---
 with tab1:
-    st.write("Sube pantallazos de Marketplace, fotos del motor o comprobantes.")
-    uploaded_file = st.file_uploader("Subir evidencia visual", type=["jpg", "png", "jpeg"])
+    st.write("Sube pantallazos de: Transferencias, Perfiles de IG/Marketplace, Conversaciones de WhatsApp.")
+    uploaded_file = st.file_uploader("Sube la imagen aquí", type=["jpg", "png", "jpeg"])
     
     if uploaded_file:
         image = Image.open(uploaded_file)
-        # CORRECCIÓN FINAL: Usamos 'use_container_width' para borrar el aviso amarillo
-        st.image(image, caption="Imagen cargada", use_container_width=True)
+        # Sin el error amarillo
+        st.image(image, caption="Evidencia a analizar", use_container_width=True)
         
-        if st.button("🔍 Ejecutar Análisis Visual"):
+        if st.button("🚨 ESCANEAR EVIDENCIA"):
             if not api_key:
-                st.error("⚠️ Faltan las credenciales (API Key).")
+                st.error("Falta la API Key.")
             else:
-                with st.spinner('Procesando imagen con Visión Artificial...'):
+                with st.spinner('Rastreando patrones de fraude...'):
                     try:
                         genai.configure(api_key=api_key)
                         model = genai.GenerativeModel('gemini-1.5-flash')
+                        
                         prompt = """
-                        Actúa como un experto mecánico y tasador de autos en Chile.
-                        Analiza esta imagen detalladamente.
-                        1. Si es un auto: Busca defectos visibles, choques o piezas faltantes.
-                        2. Si es una conversación/comprobante: Detecta señales de estafa.
-                        3. Veredicto: ¿Es seguro proceder?
+                        Actúa como el mayor experto en Ciberseguridad de Chile.
+                        Analiza esta imagen buscando SEÑALES DE PELIGRO:
+                        1. Si es comprobante bancario: Busca ediciones, fuentes distintas, horas falsas.
+                        2. Si es chat/perfil: Busca lenguaje de estafador, presión psicológica, amenazas.
+                        3. Si es venta: Precios irreales.
+                        
+                        Dime DIRECTO:
+                        - 🛑 VEREDICTO: (ESTAFA / SOSPECHOSO / REAL)
+                        - 💀 NIVEL DE RIESGO: 0-100%
+                        - 🗣️ EXPLICACIÓN: Por qué me quieren cagar.
                         """
+                        
                         response = model.generate_content([prompt, image])
-                        st.success("✅ Informe Generado")
-                        st.write(response.text)
+                        st.success("Análisis Finalizado")
+                        st.markdown(response.text)
                     except Exception as e:
-                        st.error(f"Error de conexión: {e}")
+                        st.error(f"Error: {e}")
 
-# --- MODO TEXTO ---
+# --- PESTAÑA 2: TEXTO (Correos, Amenazas, Links) ---
 with tab2:
-    st.write("Pega la descripción del vendedor o los mensajes sospechosos.")
-    texto_input = st.text_area("Datos del vehículo o conversación:", height=150)
+    st.write("Pega aquí: Correos raros, mensajes con links, amenazas de funa o descripciones.")
+    texto = st.text_area("Pega el texto sospechoso:", height=150)
     
-    if st.button("📊 Generar Informe de Riesgo"):
+    if st.button("🕵️‍♂️ ANALIZAR MENSAJE"):
         if not api_key:
-            st.error("⚠️ Faltan las credenciales (API Key).")
+            st.error("Falta la API Key.")
         else:
-            with st.spinner('Analizando patrones de mercado...'):
+            with st.spinner('Analizando intenciones...'):
                 try:
                     genai.configure(api_key=api_key)
                     model = genai.GenerativeModel('gemini-1.5-flash')
-                    prompt = f"""
-                    Actúa como consultor de negocios automotrices. Analiza este texto:
-                    "{texto_input}"
                     
-                    Genera un reporte con:
-                    1. Análisis de precio (¿Sospechoso o Real?).
-                    2. Fallas mecánicas comunes para este modelo específico.
-                    3. Veredicto de Inversión: (Comprar / Negociar / Huir).
+                    prompt = f"""
+                    Analiza este texto con mentalidad de desconfiado chileno:
+                    "{texto}"
+                    
+                    Dime:
+                    1. ¿Qué intentan hacer? (Robar datos, asustar, estafar plata).
+                    2. ¿Es real o mentira?
+                    3. ¿Qué debo responder o hacer?
                     """
+                    
                     response = model.generate_content(prompt)
-                    st.info("📋 Reporte de Inteligencia de Negocios")
-                    st.markdown(response.text)
+                    st.info("Informe de Seguridad")
+                    st.write(response.text)
                 except Exception as e:
                     st.error(f"Error: {e}")
