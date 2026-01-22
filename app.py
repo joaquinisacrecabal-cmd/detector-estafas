@@ -5,27 +5,24 @@ from PIL import Image
 # Configuración de la página
 st.set_page_config(page_title="Detector de Estafas Chile", page_icon="🕵️‍♂️")
 
-# Título y bajada
+# Título
 st.markdown("""
     <h1 style='text-align: center; color: #d32f2f;'>🕵️‍♂️ Detector de Estafas Chile</h1>
-    <p style='text-align: center; font-size: 1.2em;'>Sube el pantallazo (WhatsApp, Banco, Marketplace) y la IA te dirá si es cuento.</p>
+    <p style='text-align: center; font-size: 1.2em;'>Sube el pantallazo y la IA te dirá si es cuento.</p>
 """, unsafe_allow_html=True)
 
-# Sidebar para la llave
+# Sidebar
 with st.sidebar:
     st.header("⚙️ Configuración")
     api_key = st.text_input("Pega tu API Key de Google aquí:", type="password")
 
-# Área de subida
+# Subida de imagen
 uploaded_file = st.file_uploader("📸 Sube la evidencia aquí (Foto)", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Mostrar imagen
     image = Image.open(uploaded_file)
-    # AQUÍ ESTÁ EL ARREGLO: usamos use_container_width=True
     st.image(image, caption='Evidencia subida', use_container_width=True)
 
-    # Botón de acción
     if st.button("🚨 ANALIZAR AHORA"):
         if not api_key:
             st.error("✋ ¡ALTO! Falta la API Key en el menú de la izquierda.")
@@ -33,21 +30,20 @@ if uploaded_file is not None:
             with st.spinner('🕵️‍♂️ La IA está interrogando a la imagen...'):
                 try:
                     genai.configure(api_key=api_key)
-                    # Versión segura del modelo
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    
+                    # --- AQUÍ ESTÁ EL ARREGLO ---
+                    # Probamos con el modelo 'latest' que suele ser compatible
+                    model = genai.GenerativeModel('gemini-1.5-flash-latest')
                     
                     prompt = """
                     Actúa como experto en ciberseguridad chileno.
                     Analiza esta imagen con mentalidad de desconfiado.
-                    Busca:
-                    1. Ediciones truchas en comprobantes (fuentes distintas, photoshop).
-                    2. Lenguaje de estafador ("amigo transfiera ya", mala ortografía, presión).
-                    3. Precios imposibles en Marketplace.
+                    Busca: Ediciones truchas, lenguaje de estafador, precios falsos.
                     
-                    Responde con este formato:
+                    Responde:
                     - 🛑 VEREDICTO: (ESTAFA / SOSPECHOSO / REAL)
                     - 💀 NIVEL DE PELIGRO: 0-100%
-                    - 🗣️ EL ANÁLISIS: Explica por qué, corto y preciso.
+                    - 🗣️ EL ANÁLISIS: Explica por qué.
                     """
                     
                     response = model.generate_content([prompt, image])
